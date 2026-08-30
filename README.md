@@ -1,90 +1,100 @@
 # Tea Notes
 
-Чайна полиця: смак, спосіб заварювання, таймер проливів і нотатки після сесій.
-Двомовний інтерфейс — українська та англійська.
+A personal tea shelf: what each tea tastes like, how I brew it, a steep timer, and when I last drank it. The interface speaks Ukrainian and English.
 
-Верстку перенесено один в один із Claude Design проєкту `Tea Notes.dc.html`.
+The layout is a port of the `Tea Notes.dc.html` Claude Design file.
 
-## Запуск
+## Running it
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev        # http://localhost:5173
 npm run build
 npm run preview
 npm run typecheck
 ```
 
-## Мови
+## Languages
 
-Перемикач `УКР / ENG` у шапці. Вибір лежить у localStorage, `<html lang>` оновлюється разом із ним.
+The `УКР / ENG` switch sits in the masthead. The choice is stored in localStorage and `<html lang>` follows it.
 
-Кожне текстове поле в даних має обидві мови:
+Every text field in the data carries both languages:
 
 ```ts
 origin: { uk: 'Менку, Юньнань', en: 'Mengku, Yunnan' }
 ```
 
-Рядки інтерфейсу — у `src/i18n.tsx`, словник `ui`. Забудеш переклад — впаде типізація.
+Interface strings live in the `ui` dictionary in `src/i18n.tsx`. It is typed with `satisfies`, so a missing translation fails `tsc` rather than showing up blank in production.
 
-## Як додати чай
+Everything else in the codebase — error messages, identifiers, docs — is English. Only content is bilingual.
 
-`src/data/teas.ts`. Копіюєш обʼєкт, міняєш поля:
+## Adding a tea
+
+Open `src/data/teas.ts`, copy an object, change the fields:
 
 ```ts
 {
   id: 'slug',
-  name: 'Latin Name',            // однакова в обох мовах
-  typeKey: 'oolong',             // ключ фільтра
+  name: 'Latin Name',             // the same in both languages
+  typeKey: 'oolong',              // filter key
   type:   { uk: 'Улун', en: 'Oolong' },
   origin: { uk: '…', en: '…' },
   year:   { uk: '2023', en: '2023' },
   vendor: { uk: '…', en: '…' },
   price: '€18 / 100 g',
-  temp: 100,                     // °C
-  time: 12,                      // перший пролив, секунди
+  temp: 100,                      // °C
+  time: 12,                       // first steep, seconds
   ratio:  { uk: '8 г / 90 мл', en: '8g / 90ml' },
-  steeps: 8,                     // 1 = один пролив, без кнопки «наступний»
-  rating: 5,                     // ціле 0–5
+  steeps: 8,                      // 1 hides the "next steep" button
+  rating: 5,                      // whole number, 0–5
   when:   { uk: '…', en: '…' },
-  liquor: 'oklch(0.55 0.1 55)',  // колір настою для кружечка
-  blurb:  { uk: '…', en: '…' },  // коротко, на картку
-  long:   { uk: '…', en: '…' },  // розгорнуто, у панель
+  liquor: 'oklch(0.55 0.1 55)',   // liquor colour for the card swatch
+  blurb:  { uk: '…', en: '…' },   // short, for the card
+  long:   { uk: '…', en: '…' },   // full, for the panel
   notes: [{ uk: 'мед', en: 'honey' }],
-  lastBrewed: '2026-08-25',       // ISO, для сортування «свіже» і дати у футері
-  photo: '/photos/файл.jpg',     // необовʼязково, показується вгорі панелі
+  lastBrewed: '2026-08-25',       // ISO; drives "recent" sort and the footer date
+  photo: '/photos/file.jpg',      // optional, shown at the top of the panel
 }
 ```
 
-Новий `typeKey` сам стає кнопкою фільтра.
+A new `typeKey` turns into a filter chip on its own.
 
-## Що вміє
+## What it does
 
-- фільтр за типом, пошук, сортування (оцінка / свіже / А–Я)
-- бічна панель: паспорт, смакові нотки, розгорнута нотатка
-- таймер проливу: кожен наступний на 25% довший за попередній, як у дизайні
-- фільтр, сортування й відкритий чай живуть в URL, тож посилання можна переслати
+- filter by type, search, sort by rating / recent / A–Z
+- detail panel with brewing specs, tasting notes and the long note
+- steep timer where each infusion runs 25% longer than the last
+- filter, sort and the open tea live in the URL, so links are shareable
 
-## Рішення, які варто знати
+## Deployment
 
-**Newsreader не має кирилиці.** Тому в `--serif` за ним іде Source Serif 4: латиниця рендериться Newsreader, як у дизайні, кирилиця підхоплюється сусідом. Гліфи підбираються посимвольно, тому змішування непомітне.
+Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the site and publishes `dist/` to GitHub Pages.
 
-**Волосяні лінії сітки** в оригіналі зроблені через `gap: 1px` на кольоровому тлі контейнера. Тут лінії малюють бордери самих карток: інакше незаповнений хвіст останнього ряду світився б сірим прямокутником.
+One-time setup: **Settings -> Pages -> Source -> GitHub Actions**.
 
-**HashRouter, не BrowserRouter** — статика лягає на будь-який хостинг без rewrite-правил.
+The Vite `base` is `./`, so the build works both at a domain root and under a repository subpath.
 
-**Tailwind прибрано.** Дизайн — чистий CSS з точними значеннями в oklch, тримати їх у токенах `src/index.css` ближче до оригіналу, ніж переганяти в утиліти.
+## Decisions worth knowing
 
-## Структура
+**Newsreader has no Cyrillic.** `--serif` lists Source Serif 4 right after it: Latin renders in Newsreader exactly as the design intended, Cyrillic falls through to its neighbour. Glyph fallback happens per character, so the mix is not noticeable.
+
+**Grid hairlines come from the cards.** The original draws them with `gap: 1px` over a coloured container background. Here each card carries its own right and bottom border — otherwise the unfilled tail of the last row showed up as a grey rectangle.
+
+**HashRouter, not BrowserRouter.** The site is static and should drop onto any host without rewrite rules, GitHub Pages included.
+
+**No Tailwind.** The design is plain CSS with exact oklch values; keeping them as tokens in `src/index.css` stays closer to the source than translating them into utilities.
+
+## Layout
 
 ```
+.github/workflows/    Pages deployment
 src/
-  i18n.tsx            мови, словник, провайдер
+  i18n.tsx            languages, dictionary, provider
   types.ts            Tea, L10n
-  data/teas.ts        колекція
-  lib/format.ts       зірки, таймінги, дата
+  data/teas.ts        the collection
+  lib/format.ts       ratings, timings, dates
   components/         Masthead, LangSwitch, Toolbar, TeaCard, TeaPanel
-  pages/Shelf.tsx     сторінка
-  index.css           усі стилі
-public/photos/        картинки
+  pages/Shelf.tsx     the page
+  index.css           all styles
+public/photos/        images
 ```

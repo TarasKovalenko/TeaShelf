@@ -1,7 +1,7 @@
-Клади сюди фото чаю. Потім у `data.js` вкажи шлях:
+Drop tea photos here, then point at them from `src/data/teas.ts`:
 
-```js
-photo: "photos/mu-ye-chun-xiang.jpg"
+```ts
+photo: '/photos/mu-ye-chun-xiang.jpg'
 ```
 
-Зручний розмір — приблизно 1200×900, jpg або webp. Якщо поле порожнє або файл не знайшовся, картка сама намалює заглушку з ієрогліфом.
+Around 1200x900 works well, jpg or webp. The photo shows at the top of the detail panel; leave the field out and the panel simply skips it.
