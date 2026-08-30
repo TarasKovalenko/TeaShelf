@@ -70,7 +70,7 @@ A new `typeKey` turns into a filter chip on its own.
 
 Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the site and publishes `dist/` to GitHub Pages.
 
-One-time setup: **Settings -> Pages -> Source -> GitHub Actions**.
+The workflow turns Pages on itself via `configure-pages` with `enablement: true`, so there is no manual setup step.
 
 The Vite `base` is `./`, so the build works both at a domain root and under a repository subpath.
 
